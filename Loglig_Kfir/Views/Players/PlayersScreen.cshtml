@@ -1,0 +1,211 @@
+﻿@model Loglig_Kfir.Models.PlayersList
+ 
+
+@if (TempData["Message"] != null)
+{
+    <script type="text/javascript">
+        window.onload = function() {
+            alert("@(TempData["Message"] as string)");
+        };
+
+    </script>
+    TempData["Message"] = null;
+}
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial;
+            color: black;
+        }
+
+        .split {
+            height: 50%;
+            width: 50%;
+            position: absolute;
+            z-index: 1;
+            top: 500px;
+            overflow-x: hidden;
+            padding-top: 20px;
+        }
+
+        .left {
+            left: 0;
+            background-color: aquamarine;
+        }
+
+        .right {
+            right: 0;
+            background-color: chocolate;
+        }
+
+        .centered {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .centerImg {
+            width: auto;
+            text-align: center;
+            padding: 20px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .centered button {
+            display: flex;
+            background: yellow;
+            padding: 10px;
+            margin-right: 20px;
+            margin-bottom: 5px;
+        }
+
+        .centered input {
+            padding: 4px;
+            margin-right: 20px;
+            margin-bottom: 5px;
+        }
+
+        .extraButtons {
+            background: lightgreen;
+            font-size: 10pt;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="centerImg">
+        <img src="~/Content/loglig_logo.png" width="1280" height="500" />
+    </div>
+
+    <div class="split left">
+        <div class="centered">
+            <table class="table table-bordered table-responsive table-hover">
+                @if (Model.playersList != null)
+                {
+                    foreach (var player in Model.playersList)
+                    {
+                        <tr>
+                            <td><button class="editbtn" onclick="removePlayer('@player.Id', '@player.FirstName', '@player.LastName')">מחיקה</button></td>
+                            <td><button class="editbtn" onclick="update('@player.Id', '@player.FirstName', '@player.LastName', '@player.Email')">עדכון</button></td>
+                            <td>@player.FirstName @player.LastName</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <th>אין שחקנים בבסיס הנתונים</th>
+                    </tr>
+                }
+            </table>
+        </div>
+        <button class="extraButtons" style='width: 150px; height: 50px' onclick="createPlayer()">יצירת שחקן חדש</button>
+    </div>
+
+    <div class="split right">
+
+        <div class="centered">
+            <table class="table table-bordered table-responsive table-hover">
+                <tr>
+                    <td><input type="text" id="firstName"></td>
+                    <th>:שם פרטי </th>
+                </tr>
+                <tr>
+                    <td><input type="text" id="lastName"></td>
+                    <th>:שם משפחה </th>
+                </tr>
+                <tr>
+                    <td><input type="text" id="email"></td>
+                    <th>:מייל </th>
+                </tr>
+            </table>
+            <input type="hidden" id="id">
+        </div>
+        <button class="extraButtons" style='width: 100px; height: 50px' onclick="updatePlayer()">שמירה</button>
+    </div>
+    <script>
+        function update(id, fname, lname, email) {
+            document.getElementById("firstName").value = fname;
+            document.getElementById("lastName").value = lname;
+            document.getElementById("email").value = email;
+            document.getElementById("id").value = id;
+        }
+    </script>
+    <script>
+        function removePlayer(id, fname, lname) {
+            if (confirm("האם אתה בטוח שברצונך למחוק את השחקן " + fname + " " + lname + "?"))
+            {
+                location.href = '@Url.Action("RemovePlayer", "Players")?id=' + id;
+            }
+            else
+                alert("הפעולה בוטלה")
+        }
+    </script>
+    <script>
+        function createPlayer() {
+            var fname = document.getElementById("firstName").value;
+            var lname = document.getElementById("lastName").value;
+            var email = document.getElementById("email").value;
+            if (validate(fname, lname, email))
+                location.href = '@Url.Action("CreatePlayer", "Players")?fname=' + fname + '&lname=' + lname + '&email=' + email;
+
+        }
+    </script>
+    <script>
+        function updatePlayer() {
+            var id = document.getElementById("id").value;
+            if (id == "")
+            {
+                alert("אנא בחר שחקן לעדכון.")
+            }
+            else
+            {
+                var fname = document.getElementById("firstName").value;
+                var lname = document.getElementById("lastName").value;
+                var email = document.getElementById("email").value;
+                if (validate(fname, lname, email))
+                    location.href = '@Url.Action("UpdatePlayer", "Players")?id=' + id + '&new_fname=' + fname + '&new_lname=' + lname + '&new_email=' + email;
+            }
+        }
+    </script>
+    <script>
+        function validate(fname, lname, email) {
+            var namesRE = /^[A-Za-z\u0590-\u05FF ]+$/;
+            var mailRE = /^[a-zA-Z0-9._-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+            if (fname == "")
+            {
+                alert("אחד מהשדות ריק, אנא מלא את כל השדות.")
+                return false;
+            }
+            else if (!namesRE.test(fname) || !namesRE.test(lname))
+            {
+                alert("שם פרטי ושם משפחה יכולים להכיל רק אותיות בעברית או באנגלית.");
+                return false;
+            }
+            else if (!mailRE.test(email))
+            {
+                alert("המייל שהזנת אינו תקין, דוגמא תקינה: user@gmail.com");
+                return false;
+            }
+            else
+                return true;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+﻿
+
+@{
+    Layout = null;
+}
+
+
+
+<!DOCTYPE html>
+
+<h2>Loglig</h2>
+
+<h4>Click Login to move to the Players screen.</h4>
+
+@using (Html.BeginForm())
+{
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10 margin-top-50">
+            <input type="button" value="Login" style='width: 100px; height: 50px' onclick="location.href='@Url.Action("PlayersScreen", "Players")'" />
+        </div>
+    </div>
+}

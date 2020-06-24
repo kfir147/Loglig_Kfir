@@ -188,9 +188,9 @@
         function validate(fname, lname, email) {
             var namesRE = /^[A-Za-z\u0590-\u05FF ]+$/;
             var mailRE = /^[a-zA-Z0-9._-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-            if (fname == "")
+            if (fname == "" || lname == "" || email == "")
             {
-                alert("אחד מהשדות ריק, אנא מלא את כל השדות.")
+                alert("אחד השדות ריק, אנא מלא את כל השדות.")
                 return false;
             }
             else if (!namesRE.test(fname) || !namesRE.test(lname))

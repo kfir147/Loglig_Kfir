@@ -41,9 +41,9 @@ namespace Loglig_Kfir.DataAccess
 
         public ActionResult CreatePlayer(string fname, string lname, string email)
         {
-            //checking if this player already exists (by firstName, lastName, and email)
+            //checking if the given mail already exist (by email)
             List<Players> list = (from p in da.Players
-                                  where (p.FirstName.Equals(fname) && p.LastName.Equals(lname) && p.Email.Equals(email))
+                                  where (p.Email.Equals(email))
                                   select p).ToList<Players>();
             //if it doesn't exist, then we will add
             if (list.Count == 0)
@@ -56,7 +56,7 @@ namespace Loglig_Kfir.DataAccess
             //otherwise we will send an error message
             else
             {
-                TempData["Message"] = "אין אפשרות ליצור שחקן חדש עם הפרטים הנתונים מכיוון שהשחקן כבר קיים במאגר.";
+                TempData["Message"] = "המייל שהזנת כבר קיים במערכת, אנא בחר מייל אחר.";
                 return RedirectToAction("PlayersScreen");
             }
         }
@@ -80,17 +80,29 @@ namespace Loglig_Kfir.DataAccess
             //if it doesn't exist, then we will update
             if (list.Count == 0)
             {
-                Players player = da.Players.Single<Players>(p => p.Id == id);
-                player.FirstName = new_fname;
-                player.LastName = new_lname;
-                player.Email = new_email;
-                da.SaveChanges();
-                TempData["Message"] = "השחקן עודכן בהצלחה";
-                return RedirectToAction("PlayersScreen");
+                //checking if the mail already exists in the database
+                List<Players> mailList = (from p in da.Players
+                                      where (p.Email.Equals(new_email) && !p.Id.Equals(id))
+                                      select p).ToList<Players>();
+                if (mailList.Count == 0)
+                {
+                    Players player = da.Players.Single<Players>(p => p.Id == id);
+                    player.FirstName = new_fname;
+                    player.LastName = new_lname;
+                    player.Email = new_email;
+                    da.SaveChanges();
+                    TempData["Message"] = "השחקן עודכן בהצלחה";
+                    return RedirectToAction("PlayersScreen");
+                }
+                else
+                {
+                    TempData["Message"] = "המייל שהזנת כבר קיים במערכת, אנא נסה מייל אחר.";
+                    return RedirectToAction("PlayersScreen");
+                }
             }
             else
             {
-                TempData["Message"] = "הפרטים שהזנת כבר קיימים במאגר הנתונים ולכן לא קיימת אפשרות לעדכן.";
+                TempData["Message"] = "הפרטים הללו כבר קיימים במאגר הנתונים ולכן לא קיימת אפשרות לעדכן.";
                 return RedirectToAction("PlayersScreen");
             }
         }
